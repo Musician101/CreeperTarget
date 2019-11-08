@@ -11,12 +11,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.monster.EntityCreeper;
+import net.minecraft.entity.ai.goal.GoalSelector;
+import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.ModList;
@@ -102,20 +103,20 @@ public class CreeperTarget {
     private void serverStart(FMLServerStartingEvent event) {
         event.getCommandDispatcher().register(LiteralArgumentBuilder.<CommandSource>literal("ctr").executes(context -> {
             loadConfig();
-            context.getSource().sendFeedback(new TextComponentString("CreeperTarget config reloaded."), true);
+            context.getSource().sendFeedback(new StringTextComponent("CreeperTarget config reloaded."), true);
             return 1;
         }));
     }
 
     private void onSpawn(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
-        if (!(entity instanceof EntityCreeper)) {
+        if (!(entity instanceof CreeperEntity)) {
             return;
         }
 
-        EntityCreeper creeper = (EntityCreeper) entity;
-        EntityAIBase task = creeper.targetTasks.taskEntries.iterator().next().action;
-        creeper.targetTasks.removeTask(task);
-        creeper.targetTasks.addTask(1, new CreeperTargetPlayer(creeper));
+        CreeperEntity creeper = (CreeperEntity) entity;
+        GoalSelector goalSelector = creeper.goalSelector;
+        goalSelector.removeGoal(goalSelector.getRunningGoals().collect(Collectors.toList()).iterator().next().getGoal());
+        goalSelector.addGoal(1, new CreeperTargetPlayer(creeper));
     }
 }
