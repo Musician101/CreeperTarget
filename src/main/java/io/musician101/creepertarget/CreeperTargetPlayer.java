@@ -22,7 +22,7 @@ public class CreeperTargetPlayer extends NearestAttackableTargetGoal<PlayerEntit
     public boolean shouldContinueExecuting() {
         return getPriorityTarget().map(entityPlayer -> target.getUniqueID().equals(entityPlayer.getUniqueID())).filter(b -> {
             if (CreeperTarget.instance().ignoreSuperCreepers()) {
-                return ((CreeperEntity) goalOwner).getPowered();
+                return ((CreeperEntity) goalOwner).func_225509_J__();
             }
 
             return b;
