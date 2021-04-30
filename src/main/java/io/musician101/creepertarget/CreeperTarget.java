@@ -19,11 +19,11 @@ import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import org.apache.logging.log4j.LogManager;
@@ -44,7 +44,8 @@ public class CreeperTarget {
 
     public CreeperTarget() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::preInit);
-        MinecraftForge.EVENT_BUS.addListener(this::serverStart);
+        MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
+        MinecraftForge.EVENT_BUS.addListener(this::onSpawn);
     }
 
     public static CreeperTarget instance() {
@@ -97,11 +98,10 @@ public class CreeperTarget {
         configDir = new File("config");
         loadConfig();
         NetworkRegistry.newSimpleChannel(new ResourceLocation(MOD_ID), () -> VERSION, s -> true, s -> true);
-        MinecraftForge.EVENT_BUS.addListener(this::onSpawn);
     }
 
-    private void serverStart(FMLServerStartingEvent event) {
-        event.getCommandDispatcher().register(LiteralArgumentBuilder.<CommandSource>literal("ctr").executes(context -> {
+    private void registerCommands(RegisterCommandsEvent event) {
+        event.getDispatcher().register(LiteralArgumentBuilder.<CommandSource>literal("ctr").requires(source -> source.hasPermissionLevel(3)).executes(context -> {
             loadConfig();
             context.getSource().sendFeedback(new StringTextComponent("CreeperTarget config reloaded."), true);
             return 1;

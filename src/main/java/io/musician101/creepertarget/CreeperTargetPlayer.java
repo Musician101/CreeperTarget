@@ -2,7 +2,7 @@ package io.musician101.creepertarget;
 
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,7 +22,7 @@ public class CreeperTargetPlayer extends NearestAttackableTargetGoal<PlayerEntit
     public boolean shouldContinueExecuting() {
         return getPriorityTarget().map(entityPlayer -> target.getUniqueID().equals(entityPlayer.getUniqueID())).filter(b -> {
             if (CreeperTarget.instance().ignoreSuperCreepers()) {
-                return ((CreeperEntity) goalOwner).func_225509_J__();
+                return ((CreeperEntity) goalOwner).isCharged();
             }
 
             return b;
@@ -34,11 +34,11 @@ public class CreeperTargetPlayer extends NearestAttackableTargetGoal<PlayerEntit
         Optional<? extends PlayerEntity> target = getPriorityTarget();
         if (target.isPresent()) {
             this.target = target.get();
-            goalOwner.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(100);
+            goalOwner.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(100);
             return true;
         }
 
-        goalOwner.getAttribute(SharedMonsterAttributes.FOLLOW_RANGE).setBaseValue(16);
+        goalOwner.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(16);
         return super.shouldExecute();
     }
 }
